@@ -1,0 +1,712 @@
+/* all */
+html {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a {
+	text-decoration: none;
+}
+
+label {
+	display: inline;
+}
+
+.italic {
+	font-style: italic;
+}
+.bold {
+	font-weight: bold;
+}
+.float-right {
+	float: right !important;
+}
+.float-left {
+	float: left !important;
+}
+.hidden {
+	display: none;
+}
+ul {
+	list-style-type: circle;
+}
+.large {
+	font-size:20px;
+}
+
+/* Colours */
+$red: #7a1e37;
+$blue: #3090bc;
+$black: #222222;
+$white: white;
+//$grey: #DCDCDC;
+$grey:lighten(#DCDCDC, 5%);
+
+@mixin rounded {
+	border-radius: 5px;
+}
+
+/* main */
+
+#header {
+	background-color: $black;
+	color: $white;
+    border-color: $blue;
+    border-style: solid;
+    border-width: 0px;
+    border-bottom-width: 5px;
+    a {
+		color: $white;
+	}
+}
+.logo {
+	height: 40px;
+	widht: 140px; 
+	margin-right: 5px;
+	padding:4px;
+}
+html {
+	background-color: $grey;
+	height: 100%;
+}
+#content {
+	background-color: $white;
+	height: 100%;
+	padding-bottom: 10px; 
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+	border-radius: 0 0 5px 5px;
+}
+
+@mixin hide-overflow {
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+
+.center-nav {
+	margin-top: 15px;
+	width: 100%;
+}
+
+.bring-forward {
+	position: relative;
+	left: 0px;
+	z-index: 100;
+}
+
+.extra-info {
+	font-size:12px;
+	font-colour:#ababab;
+}
+
+.page-controls {
+	margin-top:15px;
+  .extra-info {
+    text-indent:2px;
+  	display:block;
+  }
+  h2 { 
+	padding:2px;
+	margin:0px;
+	display:inline-block;
+	position:relative;
+	top:-20px;	
+	}
+  h3 {
+	padding:2px;
+	margin:0px;
+	display:inline-block;
+	position:relative;
+	top: 10px;
+	font-weight: normal;
+  }
+  .button_normal {
+  	line-height:12px;
+  	position:relative;
+	top:-20px;
+  }
+  .img {
+  	display:inline;
+  }
+}
+
+.occurrenceControl {
+  h3 {
+	padding:2px;
+	margin:0px;
+	position:relative;
+	font-weight: normal;
+  }
+
+}
+
+input.home {
+	width: 100%;
+	margin: 2px 0;
+}
+.button_normal.home {
+	float: right;
+}
+#homeDiv {
+	margin: 0 5%;
+}
+#divider {
+	height: 160px;
+	width: 1px;
+	background-color: $black;
+}
+
+
+textarea.am {
+	margin: 5px 10px;
+	width:96%;
+	max-width:96%
+}
+
+.show-mobile {
+	display: none;
+}
+$mobile-width: 720px;
+@media (max-width: 720px){
+
+	.hide-mobile {
+		display: none;
+	}
+	.show-mobile {
+		display: inherit;
+	}
+	.logo {
+		height: 30px;
+		width: 30px;
+		margin-right:0;
+	}
+	.center-nav {
+		margin-top:0;
+	}
+	.border-mobile-bl {
+		border-bottom-left-radius: 5px;
+	}
+	input.home {
+		width: 60%;
+	}
+	.button_normal.home {
+		float: none;
+		margin: 0px 5px;
+	}
+	
+	textarea.am {
+		margin: 5px 1%;
+	}
+	.margin-mobile {
+		margin: 10px 0 5px 0;
+	}
+	.mobile-no-float {
+		float: none;
+		margin-bottom: 10px;
+	}
+	
+}
+$item-width: $mobile-width/6;
+$tree-odd: $blue;
+$tree-even: $grey;//lighten($grey, 5%);
+.tree-house {
+	position: relative;
+	top: -5px;
+	height: 30px;
+	background: $tree-odd;
+    color: $white; 
+	@include rounded;
+}
+
+
+.tree {
+    padding: 0;
+    margin: 0;
+
+    font: bold 14px/30px arial; /* line-height MUST be the same as height */
+    list-style-type:none;
+
+	
+	
+	li{
+	    float: left; /*ie6/7 needs this */
+	    line-height: 30px;
+	    
+	}
+    .node{
+	    float: left;
+	    position:relative;
+	    padding: 0 20px 0 15px;
+	    text-decoration: none;
+	    outline: none;
+	    max-width: $item-width;
+    	@include hide-overflow;
+    	text-overflow: ellipsis;
+	    &.odd{
+	    	color: $tree-odd;
+		    background: $tree-even;
+		    a {
+		    	color: $tree-odd;
+		    }
+		}
+	}
+	.arrow{
+	    position: absolute;
+	    display: block;
+	    line-height: 0px;
+	    height: 0px;
+	    width: 0px;
+	    right: 0px;
+	    top: 0px;
+	    border-left: 15px solid $tree-odd;
+	    border-right: none;
+	    border-top: 15px solid $tree-even;
+	    border-bottom: 15px solid $tree-even;
+	}
+	.back-arrow {
+	    position: absolute;
+	    display: block;
+	    line-height: 0px;
+	    height: 0px;
+	    width: 0px;
+	    //right: -5px;
+	    top: 0px;
+	    border-left: none;
+	    border-right: 15px solid $tree-even;
+	    border-top: 15px solid  $tree-odd;
+	    border-bottom: 15px solid  $tree-odd;
+	
+	}
+	.odd .arrow {
+	    border-left: 15px solid $tree-even;
+	    border-top: 15px solid $tree-odd;
+	    border-bottom: 15px solid $tree-odd;
+	}
+	
+	 a {
+	    color: $white;
+	    &:hover {
+		    text-decoration: underline;
+	 	}
+	}
+}
+
+/* toggling buttons */
+
+span.toggle-button {
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+    border-radius: 6px;
+    background: url(/images/ui/onoff.png);
+    background-repeat: no-repeat;
+    cursor: pointer;
+    height: 22px;
+    display: inline-block;
+    
+    &.state-off {
+        background-position: -36px 0;
+    }
+    &.state-on {
+        background-position: 0 -0;
+    }
+    img {
+        width: 50px;
+        height: 18px;
+    }
+}
+
+/* various buttons etc */
+@mixin button($color) {
+	@include rounded;
+	padding: 1px 4px;
+	color: $white;
+	background-color: $color;
+	cursor: pointer;
+	margin-left: 5px;
+	margin-right: 5px;
+	-webkit-appearance: none;
+	vertical-align:center;
+}
+.button.blue { 
+	@include button($blue);	
+}
+.button.red {
+	@include button($red);
+ 	float:right;
+ 	margin-right:7px;
+ 	padding:4px 14px!important;
+ 	border-radius:3px;
+ 	font-size:11px;
+ 	font-weight:bold;
+ 	/** THIS IS ONLY NEEDED ON IE7 top:-40px; Disable the margin-top too*/
+ 	margin-top:-2px;
+ 	font-family: Arial, Helvetica, sans-serif;
+ 	font-size:12px; 	
+	background-color:#812f45;
+	
+	&:hover {
+	margin-top:-2px;
+	background-color:#812f45;
+	}
+}
+.point {
+	cursor: pointer;
+}
+.label .button {
+	padding: 6px 4px;
+	margin: 0 2px;
+}
+
+
+/* notification div */
+.notification {
+	background-color: $grey;
+	@include rounded;
+	padding: 10px 10px;
+	height: 20px;
+	div {
+		@include hide-overflow;
+		text-overflow: ellipsis;
+	}
+	.remove {
+		text-align: right;
+	}
+}
+
+.msgnumber {
+  margin-left:-8px;
+  font-size:14px;
+}
+
+/* coloured labels */
+.label {
+	color: $black;
+	background-color: #85C3E0;
+	padding: 8px 8px;
+	margin-top: -25px;
+	margin-bottom: 5px;
+	border-radius: 5px 5px 0 0;
+	&.am {
+		//background-color: $grey;
+		padding: 2px 4px;
+	font-size: 120%;
+	font-weight: bold;
+	}
+}
+.expandedLabel {
+	color: $white;
+	background-color: $red;
+	@include rounded;
+	padding: 0 8px;
+	margin-bottom: 10px;
+	margin-top: 20px;
+}
+.collapsedLabel {
+	background-color: $grey;
+	@include rounded;
+}
+.selectable:nth-child(even) {
+	background-color: $grey;	
+	color:$black;
+	@include rounded;
+}
+
+.margin-side-5 {
+	margin: 0px 5px;
+}
+
+.listed {
+	padding: 5px 0px;
+	margin: 0px 5px;
+	
+	border-top:1px solid #D9D9D9;
+	&:nth-child(1) {
+		border-top: none;
+	}
+	
+	a {
+		color: $black;
+		font-size:15px;
+		line-height:21px;
+	}
+	&:hover {
+		background-color: lighten($grey, 5%);
+	}
+	&.selected {
+		background-color: $blue;
+		color: $white;
+	}
+
+}
+.focused
+{
+	background-color: $blue;
+	color:white;
+}
+.addTemplate {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.show-on-ie {
+	display: none;
+}
+
+.group {
+	background: #fafafa;
+	border-radius: 6px 6px 5px 5px;
+	padding-bottom:10px;
+	margin-top: 20px;
+	padding-top: 0;
+	margin-bottom: 45px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.toggleDiv {
+	background: #eee;
+	border-radius: 6px 6px 5px 5px;
+	padding-bottom:10px;
+	padding-top:14px;
+	margin-bottom: 45px;
+	padding-bottom: 10px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+.link {
+	cursor: pointer;
+	&:hover {
+		text-decoration: underline;
+	}
+}
+.qType div {
+	text-align: center;
+	margin: 3px;
+}
+.qType .selected {
+	margin: 0px;
+	border-style: solid;
+	border-color: $blue;
+}
+.type-icon {
+	height: 30px;
+}
+
+/*
+Notification styling
+*/
+
+#notification-wrapper {
+    z-index: 100;
+    position: fixed;
+    top: 82px;
+    width: 100%;
+    #notification {
+    max-width: $mobile-width;
+    border-radius: 5px;
+    font-size: 0.9em;
+    padding: 0 2px;
+    margin: 0 auto;
+    background-color: $black;
+    color: $white;
+        &.warning {
+             .notification-text::before {
+              content: "!!!  ";
+            }
+        }
+        &.debug {
+            .notification-text::before {
+              content: "!!! DEBUG: ";
+            }
+        }
+        div {
+            float: left;
+        }
+        .notification-text {
+            width: 90%;
+        }
+        .remove {
+            float: right;
+            background: url(/images/ui/delete_white_small.png);
+            background-repeat: no-repeat;
+            height: 20px;
+            width: 20px;
+            &:active {
+            	background-position: -1px 0px;
+            }
+        }
+    }
+}
+
+.inline {
+	display: inline;
+}
+.editing {
+	background-color: $white;
+	color: $black;
+	padding: 5px;
+}
+
+.required-indicator {
+	font-weight: bold;
+	color:#a00;
+}
+.margin-b-10 { 
+	margin-bottom: 10px;
+}
+.margin-b-5 { 
+	margin-bottom: 5px;
+}
+.margin-t-10 {
+	margin-top: 10px;
+}
+.width-90 {
+	width: 90%;
+}
+
+.guestCode {
+	margin: 0 10px 0 0;
+	float: left;
+	h3 {
+		padding: 5px;
+	}
+}
+
+.sortableList {
+	margin: 0 0 0 0px;
+ 	font-weight: bold;
+ 	cursor: move; 
+}
+ 
+.sortableList li:hover {
+ 	background-color: lightgrey;  
+}
+ 
+.sortableList a:hover {
+ 	text-decoration: none;  
+}
+
+.graphHeading {
+	word-wrap: break-word;
+}
+
+#filter-form {
+	@include rounded;
+    background-color: #85C3E0;
+    margin: 0 120px 20px 120px;
+    color: $white;
+    h3 {
+        color: $white;
+        margin: 0 0 0 20px;
+    }
+    p {
+        margin: 0px 0 0 20px;
+        color: $grey;
+    }
+    input.filter-list{
+        display:block;
+        width: 90%;
+        margin: 10px auto 10px auto;
+    }
+    input.filter-check{
+        margin: 5px 5px 5px 5px;
+    }
+    div.filter-check-group{
+        margin: 0 30px 0px 30px;
+    }
+}
+
+.smallTable td, .smallTable th {
+	padding: 0;
+}
+
+.dateFormat {
+	font-style: italic;
+	font-size: small;
+}
+
+ .controlButtons {
+ 	margin: 0 5px 0 10px;
+ }
+
+ .margin-top-5 {
+ 	margin-top: 5px;
+ }
+
+.behind {
+	position: relative;
+	z-index: 1;
+}
+.infront {
+	position: relative;
+	z-index: 2;
+}
+
+.center-grey-div{
+	@include rounded;
+    margin: 0px 20px 10px 20px;
+    padding: 4px 4px 4px 4px;
+    background-color: $grey;
+}
+
+
+
+
+ .listColumn {
+	display: block;
+    width: 14%;
+    float: left;
+ }
+ 
+ .blockedUser {
+ 	text-decoration: line-through;
+ 	color: silver;
+ }
+ 
+ .columnList img {
+ 	 vertical-align: -3px;
+ 	 padding-left: 2px;
+}
+.clickable {
+	cursor: pointer;
+	&:active {
+		position: relative;
+		top: 1px;
+	}
+}
+
+.filterWordText {
+	input.choiceTextEntry {
+        width: 90%;
+        margin-bottom: 10px;
+    }
+    
+    span.button_normal {
+        height: 30px;
+    }
+}
+
+.ignoredWords {
+	@include rounded;
+	
+	line-height:200%;
+	
+	padding: 4px 4px 4px 4px;
+	margin: 4px 4px 4px 4px;
+    background-color: $grey;
+	display: inline;
+	clear: both;
+	
+	&:hover {
+	   background-color: lighten($grey, 5%);
+	}
+	
+	span.removeChoiceButton{
+	   padding: 0px 0px 0px 0px;
+	   margin: 0px 2px 0px 0px;
+	}
+	
+	span.removeChoiceButton img{
+	   padding: 0px 0px 0px 0px;
+	}
+}

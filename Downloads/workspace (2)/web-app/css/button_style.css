@@ -1,0 +1,144 @@
+
+/**
+    These are normal buttons, showing off the reusability of the design for the logout button
+*/
+
+
+
+.button_normal {
+
+  font-size:12px!important;
+  font-weight:bold;
+  font-family: Arial, Helvetica, sans-serif;
+  
+  color:#ffffff !important;
+  background: #3090bc url('/images/ui/buttonslice_blue.png');
+  
+  cursor:pointer;
+  
+  border-radius:2px;
+  border:none;
+  border-bottom:1px solid rgba(00,00,00,.17);
+  border-right:1px solid rgba(235,235,235,.10);
+  border-top:1px solid rgba(255,255,255,.15);
+  border-left:1px solid rgba(235,235,235,.10);
+  
+  
+
+  vertical-align:9%;
+  padding:2px 11px 2px 12px;
+  box-sizing: border-box;
+  line-height:150%;
+  text-transform: none;
+  text-indent: 0px;
+  text-shadow: none;
+  margin:0px;
+  
+}
+
+
+
+.marginBuffer {
+	margin: 0 4px 0 0;
+}
+
+.button_normal:hover {
+  background: #3aaade url('/images/ui/buttonslice_blue.png');
+  text-decoration: none;
+  
+}
+
+.button_normal:active {
+  background: #2e89b3  url('/images/ui/buttonslice_blue.png');
+}
+
+.button_normal img {
+  background-color: transparent;
+  background-repeat: no-repeat;
+  border: none;
+  cursor: pointer;
+  padding-right: 2px;  
+  vertical-align:-3px;
+}
+
+
+#button_logout {
+  background: #7f2c43  url('/images/ui/buttonslice_blue.png');
+
+}
+
+#button_logout a:hover {
+  text-decoration: none;
+}
+
+#button_logout:hover {
+background: #8a304a url('/images/ui/buttonslice_blue.png');
+
+}
+
+
+#button_logout:active {
+background: #6d1a30 url('/images/ui/buttonslice_blue.png');
+}
+
+
+/**
+    These are the "generic create / other function buttons"
+*/
+
+#element_table_heading {
+  background:#7f2c43;
+  padding:16px 0px 10px 12px;
+  color:white;
+  margin-bottom:1px;
+  position:relative;
+  clear:right;
+}
+
+
+
+#element_table_heading span {
+ float:right;
+ margin-right:4px;
+ background: #7f2c42 url('/images/ui/buttonslice_large.png') repeat-x;
+ padding:9px 14px;
+ border-radius:3px;
+ font-size:11px;
+ position:relative;
+ font-weight:bold;
+ /** THIS IS ONLY NEEDED ON IE7 top:-40px; Disable the margin-top too*/
+ margin-top:-8px;
+ vertical-align:center;
+ font-family: Arial, Helvetica, sans-serif;
+ font-size:12px;
+ border:1px solid #703942;
+ border:1px solid rgba(00,00,00,.1);
+ cursor:pointer;
+}
+
+
+#element_table_heading span:hover {
+background: #812f45 url('/images/ui/buttonslice_large.png') repeat-x;
+margin-top:-9px;
+}
+
+#element_table_heading span:active {
+background: #7f2c42 url('/images/ui/buttonslice_large.png') repeat-x;
+margin-top:-6px;
+}
+
+
+#element_table_heading span img {
+  background-color: transparent;
+  background-repeat: no-repeat;
+  border: none;
+  cursor: pointer;
+  padding-right: 2px;  
+  vertical-align:-3px;
+}
+
+.noPadding {
+    padding:0px 0px 0px 0px !important;
+        
+}
+

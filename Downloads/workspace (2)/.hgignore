@@ -1,0 +1,15 @@
+target
+target-eclipse
+target/classes/ApplicationResources\.class
+^.class
+
+syntax: regexp
+^test/unit/org/ucanask/AnswerStrategy/AnswerStrategyTests\.groovy$
+syntax: glob
+stacktrace.log
+.groovy/suggestions.xdsl
+grails-app/conf/WebXmlConfig.groovy
+testDb.h2.db
+testDb.trace.db
+web-app/css/.sass-cache/8bcbff6fbc6a87f5b5924cb40eec2fa721133431/main.scssc
+*.scssc

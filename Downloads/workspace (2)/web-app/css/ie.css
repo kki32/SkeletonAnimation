@@ -1,0 +1,10 @@
+ .show-on-ie {
+	display: inherit;
+}
+.hide-on-ie {
+	display: none;
+}
+
+.button_normal {
+	vertical-align: baseline;
+}
