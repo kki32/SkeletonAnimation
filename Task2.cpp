@@ -20,6 +20,7 @@ using namespace std;
 #include <assimp/cimport.h>
 #include <assimp/types.h>
 #include <assimp/scene.h>
+#include <vector>
 #include <assimp/postprocess.h>
 #include "assimp_extras.h"
 
@@ -35,12 +36,13 @@ int tick = 0;
 int tick2 = 0;
 aiVector3D* verts;
 aiVector3D* norm;
-int updateTime = 1;
+//int[] norm;
+int updateTime = 5;
 //float TicksPerSec = 25; //4sec
 
 bool loadModel(const char* fileName)
 {
-	scene = aiImportFile(fileName, aiProcess_Debone);
+	scene = aiImportFile(fileName, aiProcessPreset_TargetRealtime_Quality);
 	if(scene == NULL) exit(1);
 	printSceneInfo(fileout, scene);
 	printTreeInfo(fileout, scene->mRootNode);
@@ -60,16 +62,39 @@ void render (const aiScene* sc, const aiNode* nd)
 
 	aiMesh* mesh;
 	aiFace* face;
-
-
+/*
+	int index = 0;
+	int vertSize = 0;
 	
+	for (uint n = 0; n < nd->mNumMeshes; n++)
+	{
+		mesh = scene->mMeshes[nd->mMeshes[n]];
+
+		for (uint iv = 0; iv < mesh->mNumVertices; iv++)
+		{
+			vertSize++;
+		}
+	}
+	* verts = new aiVector3D[vertSize];
+	*/ 
+	
+		
+
 	// Draw all meshes assigned to this node
 	for (uint n = 0; n < nd->mNumMeshes; n++)
 	{
-	
 		mesh = scene->mMeshes[nd->mMeshes[n]];
-		verts = mesh->mVertices;
-		norm = mesh->mNormals;
+
+/*
+		for (uint iv = 0; iv < mesh->mNumVertices; iv++)
+		{
+			verts[index] = mesh->mVertices[iv];
+			norm[index] =  mesh->mNormals[iv];
+			index++;
+		}
+		
+		cout << index;
+		*/ 
 	
 		apply_material(sc->mMaterials[mesh->mMaterialIndex]);
 
@@ -143,6 +168,7 @@ void initialise()
 	fileout.open("BVH_Files/sceneInfo.txt", ios::out);
 	//loadModel("BVH_Files/Dance.bvh");
 	loadModel("Model Files/dwarf.x");		//<<<-------------Specify input file name here  --------------
+	//loadModel("Models/wuson.x");		//<<<-------------Specify input file name here  --------------
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -163,50 +189,48 @@ void update(int value)
 	aiMatrix4x4 Bprod;
 
 	aiMatrix4x4 m;
+
+		for (uint j = 0; j < scene->mNumAnimations; j++){
+		anim = scene->mAnimations[j];
+		
+		if(animationStep > (int) anim->mDuration){
+			animationStep = 0;
+		} else{
+			//animationStep += 1;
+		}
 	
-	anim = scene->mAnimations[0];
-	
-	if(animationStep > (int) anim->mDuration){
-		animationStep = 0;
-	} else{
-		animationStep += 1;
-	}
-	
-	
-//get motion data and replace matrix with it
-	for (uint i = 0; i < anim->mNumChannels; i++){
-	
+		//get motion data and replace matrix with it
+		for (uint i = 0; i < anim->mNumChannels; i++){
 		tick = animationStep;
-		tick2 = animationStep;
+		//cout << anim->mTicksPerSec << endl;
+		//tick2 = animationStep;
 		chnl = anim->mChannels[i];
-		
-		if(tick <= (int) chnl->mNumPositionKeys){
+		//double t = glutGet(GLUT_ELAPSED_TIME);
+		//tick = (int) (time/1000);
+		//if(tick <= (int) chnl->mNumPositionKeys){
+			
 			if(chnl->mNumPositionKeys == 1){
-				tick = 0;
+				posn = chnl->mPositionKeys[0].mValue;
+			} else {
+				posn = chnl->mPositionKeys[tick].mValue;
 			}
-					
-			posn = chnl->mPositionKeys[tick].mValue;
-		}
 		
-		
-		if(tick2 <= (int) chnl->mNumRotationKeys){	
+
 			if(chnl->mNumRotationKeys == 1){
-				tick2 = 0;
-			}
-			
-			if(i > 0 && (chnl->mRotationKeys[i-1].mTime < tick2 && tick2 <= chnl->mRotationKeys[i].mTime)){
-				aiQuaternion rotn1 = (chnl->mRotationKeys[i-1]).mValue;
-				aiQuaternion rotn2 = (chnl->mRotationKeys[i]).mValue;
-				double time1 = (chnl->mRotationKeys[i-1]).mTime;
-				double time2 = (chnl->mRotationKeys[i]).mTime;
-				double factor = (tick2-time1)/(time2-time1);
-				rotn.Interpolate(rotn, rotn1, rotn2, factor);
+				rotn = chnl->mRotationKeys[0].mValue;
 		
-			} else{
-				rotn = chnl->mRotationKeys[tick2].mValue;
-			}
-		}
+			} else {
 			
+				rotn = chnl->mRotationKeys[tick].mValue;
+				if(i > 0 && (chnl->mRotationKeys[i-1].mTime < tick2 && tick2 <= chnl->mRotationKeys[i].mTime)){
+					aiQuaternion rotn1 = (chnl->mRotationKeys[i-1]).mValue;
+					aiQuaternion rotn2 = (chnl->mRotationKeys[i]).mValue;
+					double time1 = (chnl->mRotationKeys[i-1]).mTime;
+					double time2 = (chnl->mRotationKeys[i]).mTime;
+					double factor = (tick-time1)/(time2-time1);
+					rotn.Interpolate(rotn, rotn1, rotn2, factor);
+				} 
+			}
 
 			matPos.Translation(posn, matPos);
 			aiMatrix3x3 matRotn3 = rotn.GetMatrix();
@@ -215,38 +239,44 @@ void update(int value)
 			
 			aiNode* node = scene->mRootNode->FindNode(chnl->mNodeName);
 			node->mTransformation = matprod;
-			
-	
-			for (uint n = 0; n < node->mNumMeshes; n++)
+		
+		
+			for (uint n = 0; n < scene->mNumMeshes; n++)
 			{
 				aiMesh* mesh = scene->mMeshes[n];
-
-				for (uint bi = 0; bi < mesh->mNumBones; n++)
+			
+				for (uint bi = 0; bi < mesh->mNumBones; bi++)
 				{
 					aiBone* bone = mesh->mBones[bi];
 					Bprod = bone->mOffsetMatrix;
-			
+
 					aiNode* currentNode = scene->mRootNode->FindNode(bone->mName); //Q0
-				
-					while(currentNode != scene->mRootNode){ //Q1-QR	
-						Bprod = currentNode->mTransformation * Bprod;
-						currentNode = currentNode->mParent;
+		
+					while(currentNode != scene->mRootNode){ //Q1-QR	 //
+						Bprod = Bprod * currentNode->mTransformation ;
+						currentNode = currentNode->mParent;		
 					}
-					
-					//when mRootNode
-					Bprod = currentNode->mTransformation * Bprod;
-					int off = mesh->mNumVertices;
 						
-					int vid = (bone->mWeights[bi]).mVertexId;
-					mesh->mVertices[vid] = Bprod*verts[vid+off];
+					//when mRootNode
+					Bprod =  Bprod * currentNode->mTransformation;
 					
+					int off = mesh->mNumVertices;
+					int vid = (bone->mWeights[0]).mVertexId;
+					cout << vid << "   ";
 					aiMatrix4x4 D = Bprod.Inverse().Transpose(); //TODO not sure whether correct interpret?
-					mesh->mNormals[vid] = D*norm[vid+off]; //TODO have +off
+				
+					mesh->mVertices[vid] = Bprod * verts[vid+off];
+					mesh->mNormals[vid] = D * norm[vid+off]; //TODO have +off
 				}
 			
 			}
-
+			
+		
+		}
 	}
+	
+		
+		
 	
 			
 	render(scene, scene->mRootNode);
@@ -271,7 +301,6 @@ void keyboard(unsigned char key, int x, int y)
 void display()
 {
 
-
 	float pos[4] = {50, 50, 50, 1};
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -290,6 +319,8 @@ void display()
 	tmp = 1.f / tmp;
 	glScalef(tmp, tmp, tmp);
 
+	aiNode* rootNode = scene->mRootNode;
+
     // center the model
 	//glTranslatef( -scene_center.x, -scene_center.y, -scene_center.z );
 
@@ -304,11 +335,43 @@ void display()
             // the scenegraph by multiplying subsequent local transforms
             // together on GL's matrix stack.
             * */
-	       render(scene, scene->mRootNode);
+	    
+	       
+	       
+	aiMesh* mesh;
+	int index = 0;
+	int vertSize = 0;
+	
+	for (uint n = 0; n < scene->mNumMeshes; n++)
+	{
+		for (uint iv = 0; iv < scene->mMeshes[n]->mNumVertices; iv++)
+		{
+			vertSize++;
+		}
+	}
+	
+
+	verts = new aiVector3D[vertSize];
+	norm = new aiVector3D[vertSize];
+
+	for (uint n = 0; n < scene->mNumMeshes; n++)
+	{
+	
+		mesh = scene->mMeshes[n];
+
+		for (uint iv = 0; iv < mesh->mNumVertices; iv++)
+		{
+			verts[index] = mesh->mVertices[iv];
+			norm[index] =  mesh->mNormals[iv];
+
+			index++;
+		}
+		
+	}
+
 	       /*
 	    glEndList();
 	}
-
 
 	glCallList(scene_list);
 	*/
@@ -328,7 +391,7 @@ void display()
 	glEnd();
 	*/
 	//
-	
+	   render(scene, rootNode);
 	glutSwapBuffers();
 }
 
