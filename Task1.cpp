@@ -176,20 +176,36 @@ void update(int value)
 	
 //get motion data and replace matrix with it
 	for (uint i = 0; i < anim->mNumChannels; i++){
-
+tick = animationStep;
 		//cout << anim->mTicksPerSec << endl;
 		tick2 = animationStep;
 		chnl = anim->mChannels[i];
-		if(tick <= (int) chnl->mNumPositionKeys){
+		//if(tick <= (int) chnl->mNumPositionKeys){
+			
 			if(chnl->mNumPositionKeys == 1){
+				/*
 				tick = 0;
 			}
-					
-			posn = chnl->mPositionKeys[tick].mValue;
-		}
+			*/
+						posn = chnl->mPositionKeys[0].mValue;
 		
+		} else {
+				posn = chnl->mPositionKeys[tick].mValue;
+			}
 		
-		if(tick2 <= (int) chnl->mNumRotationKeys){	
+		/*
+		if(tick <= (int) chnl->mNumRotationKeys){
+			*/
+	
+
+					if(chnl->mNumRotationKeys == 1){
+						rotn = chnl->mRotationKeys[0].mValue;
+		
+			} else {
+				rotn = chnl->mRotationKeys[tick].mValue;
+			}
+			
+			/*	
 			if(chnl->mNumRotationKeys == 1){
 				tick2 = 0;
 			}
@@ -205,8 +221,9 @@ void update(int value)
 			} else{
 				rotn = chnl->mRotationKeys[tick2].mValue;
 			}
-		}
-			
+			*/
+		
+		
 
 			matPos.Translation(posn, matPos);
 			aiMatrix3x3 matRotn3 = rotn.GetMatrix();

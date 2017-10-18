@@ -32,14 +32,15 @@ bool modelRotn = true;
 ofstream fileout;
 int animationStep = 0;
 int tick = 0;
+int tick2 = 0;
 aiVector3D* verts;
 aiVector3D* norm;
-int updateTime = 30;
+int updateTime = 1;
 //float TicksPerSec = 25; //4sec
 
 bool loadModel(const char* fileName)
 {
-	scene = aiImportFile(fileName, aiProcessPreset_TargetRealtime_Quality);
+	scene = aiImportFile(fileName, aiProcess_Debone);
 	if(scene == NULL) exit(1);
 	printSceneInfo(fileout, scene);
 	printTreeInfo(fileout, scene->mRootNode);
@@ -59,11 +60,16 @@ void render (const aiScene* sc, const aiNode* nd)
 
 	aiMesh* mesh;
 	aiFace* face;
+
+
 	
 	// Draw all meshes assigned to this node
 	for (uint n = 0; n < nd->mNumMeshes; n++)
 	{
+	
 		mesh = scene->mMeshes[nd->mMeshes[n]];
+		verts = mesh->mVertices;
+		norm = mesh->mNormals;
 	
 		apply_material(sc->mMaterials[mesh->mMaterialIndex]);
 
@@ -134,9 +140,9 @@ void initialise()
 	glEnable(GL_NORMALIZE);
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-	fileout.open("Model Files/sceneInfo.txt", ios::out);
+	fileout.open("BVH_Files/sceneInfo.txt", ios::out);
+	//loadModel("BVH_Files/Dance.bvh");
 	loadModel("Model Files/dwarf.x");		//<<<-------------Specify input file name here  --------------
-	//loadModel("Models/dwarf.x");		//<<<-------------Specify input file name here  --------------
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -146,6 +152,7 @@ void initialise()
 //----Timer callback for continuous rotation of the model about y-axis----
 void update(int value)
 {
+
 	aiMatrix4x4 matPos;
 	aiMatrix4x4 matRotn3;
 	aiNodeAnim *chnl;
@@ -168,44 +175,51 @@ void update(int value)
 	
 //get motion data and replace matrix with it
 	for (uint i = 0; i < anim->mNumChannels; i++){
-		tick = animationStep;
-
-		chnl = anim->mChannels[i];
-
 	
+		tick = animationStep;
+		tick2 = animationStep;
+		chnl = anim->mChannels[i];
+		
 		if(tick <= (int) chnl->mNumPositionKeys){
-			if(chnl->mNumRotationKeys == 1 || chnl->mNumPositionKeys == 1 ){
+			if(chnl->mNumPositionKeys == 1){
 				tick = 0;
 			}
+					
 			posn = chnl->mPositionKeys[tick].mValue;
+		}
+		
+		
+		if(tick2 <= (int) chnl->mNumRotationKeys){	
+			if(chnl->mNumRotationKeys == 1){
+				tick2 = 0;
+			}
 			
-			if(i > 0 && (chnl->mRotationKeys[i-1].mTime < tick && tick <= chnl->mRotationKeys[i].mTime)){
+			if(i > 0 && (chnl->mRotationKeys[i-1].mTime < tick2 && tick2 <= chnl->mRotationKeys[i].mTime)){
 				aiQuaternion rotn1 = (chnl->mRotationKeys[i-1]).mValue;
 				aiQuaternion rotn2 = (chnl->mRotationKeys[i]).mValue;
 				double time1 = (chnl->mRotationKeys[i-1]).mTime;
 				double time2 = (chnl->mRotationKeys[i]).mTime;
-				double factor = (tick-time1)/(time2-time1);
+				double factor = (tick2-time1)/(time2-time1);
 				rotn.Interpolate(rotn, rotn1, rotn2, factor);
 		
 			} else{
-				rotn = chnl->mRotationKeys[tick].mValue;
+				rotn = chnl->mRotationKeys[tick2].mValue;
 			}
+		}
 			
+
 			matPos.Translation(posn, matPos);
 			aiMatrix3x3 matRotn3 = rotn.GetMatrix();
 			aiMatrix4x4 matRot = aiMatrix4x4(matRotn3);
 			matprod = matPos * matRot;
 			
-			aiNode* tempnd = scene->mRootNode->FindNode(chnl->mNodeName);
-			tempnd->mTransformation = matprod;
-		
-		/*
-			//not sure
-			for (uint n = 0; n < tempnd->mNumMeshes; n++)
+			aiNode* node = scene->mRootNode->FindNode(chnl->mNodeName);
+			node->mTransformation = matprod;
+			
+	
+			for (uint n = 0; n < node->mNumMeshes; n++)
 			{
-					aiMesh* mesh = scene->mMeshes[n];
-				verts = mesh->mVertices;
-				norm = mesh->mNormals;
+				aiMesh* mesh = scene->mMeshes[n];
 
 				for (uint bi = 0; bi < mesh->mNumBones; n++)
 				{
@@ -213,39 +227,29 @@ void update(int value)
 					Bprod = bone->mOffsetMatrix;
 			
 					aiNode* currentNode = scene->mRootNode->FindNode(bone->mName); //Q0
-					if(currentNode == scene->mRootNode){
-			
-					}
+				
 					while(currentNode != scene->mRootNode){ //Q1-QR	
-		
 						Bprod = currentNode->mTransformation * Bprod;
 						currentNode = currentNode->mParent;
 					}
 					
 					//when mRootNode
 					Bprod = currentNode->mTransformation * Bprod;
-					
+					int off = mesh->mNumVertices;
+						
 					int vid = (bone->mWeights[bi]).mVertexId;
-					mesh->mVertices[vid] = Bprod*verts[vid];
+					mesh->mVertices[vid] = Bprod*verts[vid+off];
 					
 					aiMatrix4x4 D = Bprod.Inverse().Transpose(); //TODO not sure whether correct interpret?
-					mesh->mNormals[vid] = D*norm[vid]; //TODO have +off
+					mesh->mNormals[vid] = D*norm[vid+off]; //TODO have +off
 				}
 			
 			}
-			*/
-			
-			render(scene, tempnd);
-			
-		
-	
-
-		}
 
 	}
+	
 			
-
-	//if(angle > 360) angle = 0;
+	render(scene, scene->mRootNode);
 	glutPostRedisplay();
 	glutTimerFunc(updateTime, update, 0);
 	
@@ -257,6 +261,7 @@ void update(int value)
 void keyboard(unsigned char key, int x, int y)
 {
 	if(key == '1') modelRotn = !modelRotn;   //Enable/disable initial model rotation
+	if(key == '2') animationStep += 1; 
 	glutPostRedisplay();
 }
 
