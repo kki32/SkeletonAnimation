@@ -144,56 +144,85 @@ void initialise()
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 	fileout.open("BVH_Files/sceneInfo.txt", ios::out);
-	loadModel("BVH_Files/01_01.bvh");
+	loadModel("Model Files/wuson.x");
 	//loadModel("Model Files/dwarf.x");		//<<<-------------Specify input file name here  --------------
-	//loadModel("Models/dwarf.x");		//<<<-------------Specify input file name here  --------------
+	//loadModel("Model Files/ArmyPilot.dae");		//<<<-------------Specify input file name here  --------------
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45, 1, 1.0, 1000.0);
 }
 
-//----Timer callback for continuous rotation of the model about y-axis----
-void update(int value)
-{
-
-	
+void updateNodes() {
 	aiMatrix4x4 matPos;
 	aiMatrix4x4 matRotn3;
+	aiMatrix4x4 matprod;
 	aiNodeAnim *chnl;
 	aiVector3D posn;
 	aiQuaternion rotn;
-	aiAnimation *anim;
-	aiMatrix4x4 matprod;
-	aiMatrix4x4 Bprod;
-
-	aiMatrix4x4 m;
 	
-	anim = scene->mAnimations[0];
+	aiAnimation *anim = scene->mAnimations[0];
 	
 	int time = glutGet(GLUT_ELAPSED_TIME);
+				
+	double tickPerSec = anim->mTicksPerSecond;
 
+	
+	if(tickPerSec == 0){
+		tickPerSec = 5;
+	}
+	
 	//get motion data and replace matrix with it
 	for (uint i = 0; i < anim->mNumChannels; i++){
-		tick = (time * anim->mTicksPerSecond)/1000;
-		
+		tick = (time * tickPerSec)/1000;
 		tick = tick % (int) anim->mDuration;
-		
 		chnl = anim->mChannels[i];
 
 		if(chnl->mNumPositionKeys == 1){
 			posn = chnl->mPositionKeys[0].mValue;
 		} else {
-			posn = chnl->mPositionKeys[tick].mValue;
+				posn = chnl->mPositionKeys[tick].mValue;
+			/*
+			for(uint index = 1; index < chnl->mNumPositionKeys; index++){
+				if(chnl->mPositionKeys[index-1].mTime < tick && tick <= chnl->mPositionKeys[index].mTime){
+					aiVector3D posn1 = (chnl->mPositionKeys[index-1]).mValue; 
+					aiVector3D posn2 = (chnl->mPositionKeys[index]).mValue;
+					
+					float time1 = (chnl->mPositionKeys[index-1]).mTime; //x
+					float time2 = (chnl->mPositionKeys[index]).mTime; 
+					
+					float factor = (tick-time1)/(time2-time1);
+					
+					posn = (posn1 * (1-factor)) + (posn2 * factor);
+					break;
+				}
+			} 
+			*/ 
+			
 		}
-		
+
+
 		if(chnl->mNumRotationKeys == 1){
 			rotn = chnl->mRotationKeys[0].mValue;
 		} else {
+				rotn = chnl->mRotationKeys[tick].mValue;
+			/*	
+			for(uint index = 1; index < chnl->mNumRotationKeys; index++){
+				if(chnl->mRotationKeys[index-1].mTime < tick && tick <= chnl->mRotationKeys[index].mTime){
+					rotn = chnl->mRotationKeys[tick].mValue;
+					aiQuaternion rotn1 = (chnl->mRotationKeys[index-1]).mValue;
+					aiQuaternion rotn2 = (chnl->mRotationKeys[index]).mValue;
+					double time1 = (chnl->mRotationKeys[index-1]).mTime;
+					double time2 = (chnl->mRotationKeys[index]).mTime;
+					double factor = (tick-time1)/(time2-time1);
+					rotn.Interpolate(rotn, rotn1, rotn2, factor);
+					break;
+				}
+			}
+			*/  
 			
-			rotn = chnl->mRotationKeys[tick].mValue;
+			
 		}
-		
 
 		matPos.Translation(posn, matPos);
 		aiMatrix3x3 matRotn3 = rotn.GetMatrix();
@@ -203,7 +232,14 @@ void update(int value)
 		aiNode* node = scene->mRootNode->FindNode(chnl->mNodeName);
 		node->mTransformation = matprod;
 	}
-	
+}
+
+
+//----Timer callback for continuous rotation of the model about y-axis----
+void update(int value)
+{
+
+	//updateNodes();
 			
 	render(scene, scene->mRootNode);
 	glutPostRedisplay();
@@ -216,7 +252,7 @@ void update(int value)
 //----Keyboard callback to toggle initial model orientation---
 void keyboard(unsigned char key, int x, int y)
 {
-	if(key == '1') modelRotn = !modelRotn;   //Enable/disable initial model rotation
+	if(key == '1') animationStep++;   //Enable/disable initial model rotation
 	if(key == '2'){
 		angle++;
 		cout << angle << endl;
@@ -248,8 +284,8 @@ void makeFloor(){
 	glPushMatrix();
     glBegin(GL_QUADS);
 
-    glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-    glColor3f(1.0f, 0.0f, 0.0f);
+   // glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+    glColor3f(0.64,0.16,0.16);
     glVertex3f(-1000, -20, -1000);
     glVertex3f(-1000, -10, 1000);
     glVertex3f(1000, -10, 100);
@@ -257,23 +293,25 @@ void makeFloor(){
     
     glEnd();
     glPopMatrix();
+    glDisable(GL_COLOR_MATERIAL);
 
 }
 	
-void makeBox(float x, float y, float z){
+void createWall(){
 
     glEnable(GL_COLOR_MATERIAL);
+
     //back wall
     glPushMatrix();
     glTranslatef(0,0,65);
-    glScalef(8.0f, 2.0f, 2.0f);
+    glScalef(8.0f, 10.0f, 2.0f);
 	glutSolidCube(5);
 	glPopMatrix();
 	
 	//back
 	glPushMatrix();
 	glTranslatef(-10,0,-40);
-    glScalef(8.0f, 2.0f, 2.0f);
+    glScalef(8.0f, 10.0f, 2.0f);
 	glutSolidCube(5);
 	glPopMatrix();
 
@@ -282,7 +320,7 @@ void makeBox(float x, float y, float z){
 	glTranslatef(-10,0,25);
 	glPushMatrix();
   	glRotatef(90, 0, 1, 0);
-    glScalef(11.0f, 2.0f, 2.0f);
+    glScalef(11.0f, 10.0f, 2.0f);
 	glutSolidCube(5);
 	glPopMatrix();
 	glPopMatrix();
@@ -292,94 +330,12 @@ void makeBox(float x, float y, float z){
 	glTranslatef(30,0,15);
 	glPushMatrix();
   	glRotatef(90, 0, 1, 0);
-    glScalef(15.0f, 2.0f, 2.0f);
+    glScalef(15.0f, 10.0f, 2.0f);
 	glutSolidCube(5);
 	glPopMatrix();
 	glPopMatrix();
-/*
-   
-
-    glScalef(8.0f, 2.0f, 10.0f);
-
-    glBegin(GL_POLYGON);
-    glColor3f(   1.0,  0.0, 0.0 );
-    glVertex3f(  0.5, -0.2, 0.1 );
-    glVertex3f(  0.5,  0.2, 0.1 );
-    glVertex3f( -0.5,  0.2, 0.1 );
-    glVertex3f( -0.5, -0.2, 0.1 );
-    glEnd();
-    
-    // Purple side - RIGHT
-    glBegin(GL_POLYGON);
-    glColor3f(  1.0,  0.0,  1.0 );
-    glVertex3f( 0.5, -0.2, -0.1 );
-    glVertex3f( 0.5,  0.2, -0.1 );
-    glVertex3f( 0.5,  0.2,  0.1 );
-    glVertex3f( 0.5, -0.2,  0.1 );
-    glEnd();
-    
-    // Green side - LEFT
-    glBegin(GL_POLYGON);
-    glColor3f(   0.0,  1.0,  0.0 );
-    glVertex3f( -0.5, -0.2,  0.1 );
-    glVertex3f( -0.5,  0.2,  0.1 );
-    glVertex3f( -0.5,  0.2, -0.1 );
-    glVertex3f( -0.5, -0.2, -0.1 );
-    glEnd();
-    
-    // Blue side - TOP
-    glBegin(GL_POLYGON);
-    glColor3f(   0.0,  0.0,  1.0 );
-    glVertex3f(  0.5,  0.2,  0.1 );
-    glVertex3f(  0.5,  0.2, -0.1 );
-    glVertex3f( -0.5,  0.2, -0.1 );
-    glVertex3f( -0.5,  0.2,  0.1 );
-    glEnd();
-    
-    // Red side - BOTTOM
-    glBegin(GL_POLYGON);
-    glColor3f(   1.0,  0.0,  0.0 );
-    glVertex3f(  0.5, -0.2, -0.2 );
-    glVertex3f(  0.5, -0.2,  0.2 );
-    glVertex3f( -0.5, -0.2,  0.2 );
-    glVertex3f( -0.5, -0.2, -0.2 );
-    glEnd();
-    
-    glPopMatrix();
-    */ 
-	// Front
-	/*
-	-1.0, -1.0, 1.0,
-	1.0, -1.0, 1.0,
-	1.0,  1.0, 1.0,
-	-1.0,  1.0, 1.0,
-	// Right
-	1.0, -1.0, 1.0,
-	1.0, -1.0, -1.0,
-	1.0,  1.0, -1.0,
-	1.0,  1.0, 1.0,
-	// Back
-	-1.0, -1.0, -1.0,
-	-1.0,  1.0, -1.0,
-	1.0,  1.0, -1.0,
-	1.0, -1.0, -1.0,
-	// Left
-	-1.0, -1.0, 1.0,
-	-1.0,  1.0, 1.0,
-	-1.0,  1.0, -1.0,
-	-1.0, -1.0, -1.0,
-	// Bottom
-	-1.0, -1.0, 1.0,
-	-1.0, -1.0, -1.0,
-	1.0, -1.0, -1.0,
-	1.0, -1.0, 1.0,
-	// Top
-	-1.0,  1.0, 1.0,
-	1.0,  1.0, 1.0,
-	1.0,  1.0, -1.0,
-	-1.0,  1.0, -1.0
-	*/
-
+	
+	glDisable(GL_COLOR_MATERIAL);
 }
 
 //------The main display function---------
@@ -387,9 +343,12 @@ void makeBox(float x, float y, float z){
 //    stored for subsequent display updates.
 void display()
 {
+	aiQuaterniont<float> quat; 
+	aiVector3t<float> look;
+	
 	float pos[4] = {10, 50, -18, 1};
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
@@ -399,24 +358,20 @@ void display()
 	tmp = aisgl_max(scene_max.z - scene_min.z,tmp);
 	tmp = 1.f / tmp;
 	
-	aiQuaterniont<float> quat; 
-	aiVector3t<float> look;
 	scene->mRootNode->mTransformation.DecomposeNoScaling(quat, look);
 	look = tmp * look;
-	//gluLookAt(0, 2, 3, 0, 0, -5, 0, 1, 0);
 	gluLookAt(look.x+lookOffX, look.y+lookOffY, look.z+lookOffZ, look.x, look.y, look.z, 0, 1, 0);
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
 	
 	glRotatef(angle, 0.f, 1.f ,0.f);  //Continuous rotation about the y-axis
 
-	
 	glScalef(tmp, tmp, tmp);
 
 	render(scene, scene->mRootNode);
 
-	//create floor
+	//create other objects
 	makeFloor();
-	makeBox(9,0,-17.5);
+	createWall();
 
 	glutSwapBuffers();
 }
