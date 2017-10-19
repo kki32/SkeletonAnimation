@@ -76,17 +76,9 @@ void render (const aiScene* sc, const aiNode* nd)
 	aiTransposeMatrix4(&m);   //Convert to column-major order
 	glPushMatrix();
 	glMultMatrixf((float*)&m);   //Multiply by the transformation matrix for this node
-/*
-	glPushMatrix();
-	glutSolidCube(3);
-		glPopMatrix();
-		
-		*/
 		
 	aiMesh* mesh;
 	aiFace* face;
-
-		
 
 	// Draw all meshes assigned to this node
 	for (uint n = 0; n < nd->mNumMeshes; n++)
@@ -215,7 +207,7 @@ void updateNodes() {
 	aiAnimation *anim = scene->mAnimations[0];
 		//int time = glutGet(GLUT_ELAPSED_TIME);
 				
-		tick = animationStep + 1;
+		tick = animationStep;
 
 	//get motion data and replace matrix with it
 	for (uint i = 0; i < anim->mNumChannels; i++){
@@ -314,7 +306,7 @@ void updateMeshes() {
 			Bprod =   currentNode->mTransformation * Bprod;
 				
 			aiMatrix4x4 D = Bprod;
-			D = D.Transpose(); 
+			D = D.Inverse().Transpose(); 
 			
 			int vid;
 			
@@ -339,8 +331,8 @@ void update(int value)
 
 	anim = scene->mAnimations[0];
 	
-	if(animationStep > (int) anim->mDuration){
-		animationStep = 0;
+	if(animationStep >= (int) anim->mDuration){
+		animationStep = 1;
 	} else{
 		animationStep += 1;
 	}
