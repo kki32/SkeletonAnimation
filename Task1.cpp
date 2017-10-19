@@ -25,7 +25,7 @@ using namespace std;
 
 const aiScene* scene = NULL;
 GLuint scene_list = 0;
-float angle = 0;
+float angle = 280;
 float pos = 0;
 aiVector3D scene_min, scene_max, scene_center;
 bool modelRotn = false;
@@ -176,7 +176,7 @@ void update(int value)
 	//get motion data and replace matrix with it
 	for (uint i = 0; i < anim->mNumChannels; i++){
 		tick = (time * anim->mTicksPerSecond)/1000;
-				cout << anim->mTicksPerSecond << endl;
+		
 		tick = tick % (int) anim->mDuration;
 		
 		chnl = anim->mChannels[i];
@@ -219,6 +219,7 @@ void keyboard(unsigned char key, int x, int y)
 	if(key == '1') modelRotn = !modelRotn;   //Enable/disable initial model rotation
 	if(key == '2'){
 		angle++;
+		cout << angle << endl;
 		if(angle > 360) angle = 0;
 	} 
 
@@ -243,10 +244,10 @@ void keyboard(unsigned char key, int x, int y)
 	glutPostRedisplay();
 }
 void makeFloor(){
-
+    glEnable(GL_COLOR_MATERIAL);
 	glPushMatrix();
     glBegin(GL_QUADS);
-    glEnable(GL_COLOR_MATERIAL);
+
     glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
     glColor3f(1.0f, 0.0f, 0.0f);
     glVertex3f(-1000, -20, -1000);
@@ -262,45 +263,77 @@ void makeFloor(){
 void makeBox(float x, float y, float z){
 
     glEnable(GL_COLOR_MATERIAL);
+    //back wall
     glPushMatrix();
+    glTranslatef(0,0,65);
+    glScalef(8.0f, 2.0f, 2.0f);
+	glutSolidCube(5);
+	glPopMatrix();
+	
+	//back
+	glPushMatrix();
+	glTranslatef(-10,0,-40);
+    glScalef(8.0f, 2.0f, 2.0f);
+	glutSolidCube(5);
+	glPopMatrix();
 
-    glTranslatef(x, y, z);
+	//side l
+	glPushMatrix();
+	glTranslatef(-10,0,25);
+	glPushMatrix();
+  	glRotatef(90, 0, 1, 0);
+    glScalef(11.0f, 2.0f, 2.0f);
+	glutSolidCube(5);
+	glPopMatrix();
+	glPopMatrix();
+	
+	//side r
+	glPushMatrix();
+	glTranslatef(30,0,15);
+	glPushMatrix();
+  	glRotatef(90, 0, 1, 0);
+    glScalef(15.0f, 2.0f, 2.0f);
+	glutSolidCube(5);
+	glPopMatrix();
+	glPopMatrix();
+/*
+   
 
-    glScalef(8.0f, 7.0f, 10.0f);
+    glScalef(8.0f, 2.0f, 10.0f);
 
     glBegin(GL_POLYGON);
     glColor3f(   1.0,  0.0, 0.0 );
-    glVertex3f(  0.5, -0.2, 0.2 );
-    glVertex3f(  0.5,  0.2, 0.2 );
-    glVertex3f( -0.5,  0.2, 0.2 );
-    glVertex3f( -0.5, -0.2, 0.2 );
+    glVertex3f(  0.5, -0.2, 0.1 );
+    glVertex3f(  0.5,  0.2, 0.1 );
+    glVertex3f( -0.5,  0.2, 0.1 );
+    glVertex3f( -0.5, -0.2, 0.1 );
     glEnd();
     
     // Purple side - RIGHT
     glBegin(GL_POLYGON);
     glColor3f(  1.0,  0.0,  1.0 );
-    glVertex3f( 0.5, -0.2, -0.2 );
-    glVertex3f( 0.5,  0.2, -0.2 );
-    glVertex3f( 0.5,  0.2,  0.2 );
-    glVertex3f( 0.5, -0.2,  0.2 );
+    glVertex3f( 0.5, -0.2, -0.1 );
+    glVertex3f( 0.5,  0.2, -0.1 );
+    glVertex3f( 0.5,  0.2,  0.1 );
+    glVertex3f( 0.5, -0.2,  0.1 );
     glEnd();
     
     // Green side - LEFT
     glBegin(GL_POLYGON);
     glColor3f(   0.0,  1.0,  0.0 );
-    glVertex3f( -0.5, -0.2,  0.2 );
-    glVertex3f( -0.5,  0.2,  0.2 );
-    glVertex3f( -0.5,  0.2, -0.2 );
-    glVertex3f( -0.5, -0.2, -0.2 );
+    glVertex3f( -0.5, -0.2,  0.1 );
+    glVertex3f( -0.5,  0.2,  0.1 );
+    glVertex3f( -0.5,  0.2, -0.1 );
+    glVertex3f( -0.5, -0.2, -0.1 );
     glEnd();
     
     // Blue side - TOP
     glBegin(GL_POLYGON);
     glColor3f(   0.0,  0.0,  1.0 );
-    glVertex3f(  0.5,  0.2,  0.2 );
-    glVertex3f(  0.5,  0.2, -0.2 );
-    glVertex3f( -0.5,  0.2, -0.2 );
-    glVertex3f( -0.5,  0.2,  0.2 );
+    glVertex3f(  0.5,  0.2,  0.1 );
+    glVertex3f(  0.5,  0.2, -0.1 );
+    glVertex3f( -0.5,  0.2, -0.1 );
+    glVertex3f( -0.5,  0.2,  0.1 );
     glEnd();
     
     // Red side - BOTTOM
@@ -311,8 +344,41 @@ void makeBox(float x, float y, float z){
     glVertex3f( -0.5, -0.2,  0.2 );
     glVertex3f( -0.5, -0.2, -0.2 );
     glEnd();
+    
     glPopMatrix();
-
+    */ 
+	// Front
+	/*
+	-1.0, -1.0, 1.0,
+	1.0, -1.0, 1.0,
+	1.0,  1.0, 1.0,
+	-1.0,  1.0, 1.0,
+	// Right
+	1.0, -1.0, 1.0,
+	1.0, -1.0, -1.0,
+	1.0,  1.0, -1.0,
+	1.0,  1.0, 1.0,
+	// Back
+	-1.0, -1.0, -1.0,
+	-1.0,  1.0, -1.0,
+	1.0,  1.0, -1.0,
+	1.0, -1.0, -1.0,
+	// Left
+	-1.0, -1.0, 1.0,
+	-1.0,  1.0, 1.0,
+	-1.0,  1.0, -1.0,
+	-1.0, -1.0, -1.0,
+	// Bottom
+	-1.0, -1.0, 1.0,
+	-1.0, -1.0, -1.0,
+	1.0, -1.0, -1.0,
+	1.0, -1.0, 1.0,
+	// Top
+	-1.0,  1.0, 1.0,
+	1.0,  1.0, 1.0,
+	1.0,  1.0, -1.0,
+	-1.0,  1.0, -1.0
+	*/
 
 }
 
@@ -321,7 +387,7 @@ void makeBox(float x, float y, float z){
 //    stored for subsequent display updates.
 void display()
 {
-	float pos[4] = {50, 50, 50, 1};
+	float pos[4] = {10, 50, -18, 1};
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
@@ -337,7 +403,7 @@ void display()
 	aiVector3t<float> look;
 	scene->mRootNode->mTransformation.DecomposeNoScaling(quat, look);
 	look = tmp * look;
-
+	//gluLookAt(0, 2, 3, 0, 0, -5, 0, 1, 0);
 	gluLookAt(look.x+lookOffX, look.y+lookOffY, look.z+lookOffZ, look.x, look.y, look.z, 0, 1, 0);
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
 	
@@ -350,10 +416,8 @@ void display()
 
 	//create floor
 	makeFloor();
-	makeBox(-10,-12,0);
-	makeBox(0,-4,-5);
-	makeBox(0,-4,0);
-	
+	makeBox(9,0,-17.5);
+
 	glutSwapBuffers();
 }
 

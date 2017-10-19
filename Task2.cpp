@@ -165,7 +165,7 @@ void initialise()
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 	fileout.open("BVH_Files/sceneInfo.txt", ios::out);
 	//loadModel("BVH_Files/Dance.bvh");
-	loadModel("Model Files/wuson.x");		//<<<-------------Specify input file name here  --------------
+	loadModel("Model Files/dwarf.x");		//<<<-------------Specify input file name here  --------------
 	//loadModel("Models/wuson.x");		//<<<-------------Specify input file name here  --------------
 	
 	glMatrixMode(GL_PROJECTION);
