@@ -26,7 +26,7 @@ using namespace std;
 
 const aiScene* scene = NULL;
 GLuint scene_list = 0;
-float angle = 0;
+float angle = 360;
 float pos = 0;
 aiVector3D scene_min, scene_max, scene_center;
 bool modelRotn = true;
@@ -37,19 +37,23 @@ int tick2 = 0;
 aiVector3D* verts;
 aiVector3D* norm;
 //int[] norm;
-int updateTime = 30;
-//float TicksPerSec = 25; //4sec
-int lookOffX = 300;
-int lookOffY = 3;
-int lookOffZ = 2;
+int updateTime = 3;
+//float TicksPerSec = 25; //4secTicksPerSec
+float lookOffX = -5;
+float lookOffY = 3;
+float lookOffZ = 0;
+float rOffX = 0;
+float rOffY = 0;
+float rOffZ = 0;
+float movedDist = 0;
+int movedToken = 0;
 
 void makeFloor(){
-
     glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+    glColor3f(0.0f, 0.0f, 1.0f);
 	glPushMatrix();
     glBegin(GL_QUADS);
-
-    glColor3f(1.0f, 0.0f, 0.0f);
     glVertex3f(-1000, -20, -1000);
     glVertex3f(-1000, -10, 1000);
     glVertex3f(1000, -10, 100);
@@ -58,7 +62,6 @@ void makeFloor(){
     glEnd();
     glPopMatrix();
     glDisable(GL_COLOR_MATERIAL);
-
 	}
 	
 bool loadModel(const char* fileName)
@@ -76,6 +79,9 @@ void createWall(){
 
     glEnable(GL_COLOR_MATERIAL);
     //back wall
+    glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+    glColor3f(1,0,0);
+    
     glPushMatrix();
     glTranslatef(0,15,65);
     glScalef(8.0f, 15.0f, 2.0f);
@@ -85,6 +91,24 @@ void createWall(){
 	
 
 }
+
+void createCrystal(){
+	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+    glColor3f(0.64,0.16,0.16);
+    
+	glPushMatrix();
+	//glRotatef(angle, 1, 0, 0);
+	//glTranslatef(movedDist,0,3);
+
+	glPushMatrix();
+
+	glTranslatef(0,0,3);
+	//glRotatef(90, 0, 1, 0);
+	glScalef(1.0, 1.0, 1.0);
+	glutSolidDodecahedron();
+	glPopMatrix();
+	glPopMatrix();
+	}
 
 // ------A recursive function to traverse scene graph and render each mesh----------
 void render (const aiScene* sc, const aiNode* nd)
@@ -234,17 +258,16 @@ void updateNodes() {
 
 	
 	if(tickPerSec == 0){
-		tickPerSec = 30;
+		tickPerSec = 2;
 	}
-	
+	tickPerSec = 800;
 	tick = (time * tickPerSec)/1000;
 	tick = tick % (int) anim->mDuration;
-	
-	tick = animationStep;
+
 	//get motion data and replace matrix with it
 	for (uint i = 0; i < anim->mNumChannels; i++){
 		chnl = anim->mChannels[i];
-		cout >> chnl->
+		
 		
 		if(chnl->mNumPositionKeys == 1){
 			posn = chnl->mPositionKeys[0].mValue;
@@ -260,11 +283,18 @@ void updateNodes() {
 					float factor = (tick-time1)/(time2-time1);
 					
 					posn = (posn1 * (1-factor)) + (posn2 * factor);
+					movedDist += 0.008;
+	
+					rOffZ += 0.003;	
+			
+	
+				
+			
 					break;
+					
 				}
 			} 
-		
-			
+	
 		}
 
 
@@ -335,8 +365,6 @@ void updateMeshes() {
 				mesh->mVertices[vid] = Bprod * verts[vid+off];
 				mesh->mNormals[vid] = D * norm[vid+off]; //TODO have +off
 			}
-			
-	
 		}
 		off = off + mesh->mNumVertices;
 	
@@ -358,8 +386,7 @@ void update(int value)
 	updateNodes();
 	
 	updateMeshes();	
-	
-			
+
 	render(scene, scene->mRootNode);
 	glutPostRedisplay();
 	glutTimerFunc(updateTime, update, 0);
@@ -373,17 +400,18 @@ void keyboard(unsigned char key, int x, int y)
 {
 	if(key == '1') modelRotn = !modelRotn;   //Enable/disable initial model rotation
 	if(key == '2'){
+		movedDist++;
 		angle++;
 		cout << angle << endl;
 		if(angle > 360) angle = 0;
 	} 
 
 	if(key == '3'){
-		lookOffX = lookOffX + 5;
+		lookOffX = lookOffX + 1;
 			cout << lookOffX << endl;
 	}
 	if(key == '4'){
-		lookOffX = lookOffX - 5;
+		lookOffX = lookOffX - 1;
 	
 	}
 	if(key == '5'){
@@ -393,15 +421,30 @@ void keyboard(unsigned char key, int x, int y)
 		lookOffY = lookOffY - 5;
 	}
 	if(key == '7'){
-		lookOffZ = lookOffZ + 5;
+		lookOffZ = lookOffZ + 1;
 	}
 	if(key == '8'){
-		lookOffZ = lookOffZ - 5;
+		lookOffZ = lookOffZ - 1;
 	}
 	if(key == '9'){
-		animationStep++;
+		rOffX = rOffX + 5;
+	}
+	if(key == '0'){
+		rOffX = rOffX - 5;
+	}
+	if(key == 'q'){
+		rOffY = rOffY + 5;
+	}
+	if(key == 'w'){
+		rOffY = rOffY - 5;
+	}
+	if(key == 'e'){
+		rOffZ = rOffZ + 5;
 	}
 	
+	if(key == 'r'){
+		rOffZ = rOffZ - 5;
+	}
 	glutPostRedisplay();
 }
 
@@ -413,32 +456,74 @@ void display()
 	aiQuaterniont<float> quat; 
 	aiVector3t<float> look;
 	
-	float pos[4] = {10, 50, -18, 1};
+	look.x = 0;
+	look.y = 0;
+	look.z = 0;
+	float pos[4] = {-50, 50, 2, 1};
+		//float pos[4] = {10, 50, -18, 1};
+	
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	
+	/*
 	// scale the whole asset to fit into our view frustum
 	float tmp = scene_max.x - scene_min.x;
 	tmp = aisgl_max(scene_max.y - scene_min.y,tmp);
 	tmp = aisgl_max(scene_max.z - scene_min.z,tmp);
 	tmp = 1.f / tmp;
-		glScalef(tmp, tmp, tmp);
+	glScalef(tmp, tmp, tmp);
 	scene->mRootNode->mTransformation.DecomposeNoScaling(quat, look);
+	cout << temp << endl;
+	
+	look = tmp * look;
+	
+	//scene->mRootNode->mTransformation.DecomposeNoScaling(quat, look);
+	//look = tmp * look;
+	
+	glLightfv(GL_LIGHT0, GL_POSITION, pos);
+	
+	glRotatef(angle, 0.f, 1.f ,0.f);  //Continuous rotation about the y-axis
+	*/
+	// scale the whole asset to fit into our view frustum
 
-	gluLookAt(look.x+lookOffX, look.y+lookOffY, look.z+lookOffZ, look.x, look.y, look.z, 0, 1, 0);
+	
+	//scene->mRootNode->mTransformation.DecomposeNoScaling(quat, look);
+	//look = tmp * look;
+		cout << look.x<< " x" << endl;	cout << look.y <<" y" << endl; 	cout << look.z << " z" << endl;
+	//gluLookAt(look.x+lookOffX, look.y+lookOffY, look.z+lookOffZ, look.x+rOffX, look.y+rOffY, look.z+rOffZ, 0, 1, 0);
+	gluLookAt(look.x+lookOffX, look.y+lookOffY, look.z+lookOffZ, rOffX, rOffY, rOffZ, 0, 1, 0);
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
 	
 	glRotatef(angle, 0.f, 1.f ,0.f);  //Continuous rotation about the y-axis
 
 
+	float tmp = scene_max.x - scene_min.x;
+	tmp = aisgl_max(scene_max.y - scene_min.y,tmp);
+	tmp = aisgl_max(scene_max.z - scene_min.z,tmp);
+	tmp = 1.f / tmp;
+	
+		glScalef(tmp, tmp, tmp);
+	glTranslatef( -scene_center.x, -scene_center.y, -scene_center.z );
+	//First, rotate the model about x-axis if needed.
 
-	render(scene, scene->mRootNode);
+    // center the model
 
 	//create other objects
-	makeFloor();
+
+
+
 	createWall();
+	createCrystal();
+	
+	glPushMatrix();
+	glTranslatef(0,0,movedDist);
+	makeFloor();
+	glPushMatrix();
+	glRotatef(90, 1, 0, 0);
+	render(scene, scene->mRootNode);
+	glPopMatrix();
+	glPopMatrix();
 
 	glutSwapBuffers();
 }

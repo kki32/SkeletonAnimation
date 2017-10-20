@@ -144,7 +144,7 @@ void initialise()
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 	fileout.open("BVH_Files/sceneInfo.txt", ios::out);
-	loadModel("Model Files/wuson.x");
+	loadModel("BVH_Files/01_01.bvh");
 	//loadModel("Model Files/dwarf.x");		//<<<-------------Specify input file name here  --------------
 	//loadModel("Model Files/ArmyPilot.dae");		//<<<-------------Specify input file name here  --------------
 	
@@ -239,7 +239,7 @@ void updateNodes() {
 void update(int value)
 {
 
-	//updateNodes();
+	updateNodes();
 			
 	render(scene, scene->mRootNode);
 	glutPostRedisplay();
@@ -360,6 +360,8 @@ void display()
 	
 	scene->mRootNode->mTransformation.DecomposeNoScaling(quat, look);
 	look = tmp * look;
+		cout << look.x<< " x" << endl;	cout << look.y <<" y" << endl; 	cout << look.z << " z" << endl;
+
 	gluLookAt(look.x+lookOffX, look.y+lookOffY, look.z+lookOffZ, look.x, look.y, look.z, 0, 1, 0);
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
 	
