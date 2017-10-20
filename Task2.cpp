@@ -25,18 +25,14 @@ using namespace std;
 #include "assimp_extras.h"
 
 const aiScene* scene = NULL;
-GLuint scene_list = 0;
 float angle = 90;
-float pos = 0;
 aiVector3D scene_min, scene_max, scene_center;
-bool modelRotn = true;
 ofstream fileout;
-bool stop = false;
-int tick = 0;
 
 aiVector3D* verts;
 aiVector3D* norm;
 
+int tick = 0;
 int updateTime = 3;
 float lookOffX = 0;
 float lookOffY = 3;
@@ -46,26 +42,15 @@ float rOffY = 0;
 float rOffZ = 0;
 float movedDist = 0;
 int movedToken = 0;
-float crystalAngle = 0;
-float crystalZ = 0;
+float rockAngle = 0;
+float rockZ = 0;
 float initialTickPerSec = 5000;
+const float RUNNING = 92;
+bool stop = false;
 
-void makeFloor(){
-    glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-    glColor3f(0.0f, 1.0f, 0.0f);
-	glPushMatrix();
-    glBegin(GL_QUADS);
-    glVertex3f(-1000, -20, -1000);
-    glVertex3f(-1000, -10, 1000);
-    glVertex3f(1000, -10, 1000);
-    glVertex3f(1000, -10, -1000);
 
-    glEnd();
-    glPopMatrix();
-    glDisable(GL_COLOR_MATERIAL);
-	}
-	
+
+// ------Load scene and model----------
 bool loadModel(const char* fileName)
 {
 	scene = aiImportFile(fileName, aiProcessPreset_TargetRealtime_Quality);
@@ -76,7 +61,25 @@ bool loadModel(const char* fileName)
 	get_bounding_box(scene, &scene_min, &scene_max);
 	return true;
 }
+//----Create floor in a scene----
+void createFloor(){
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+    glColor3f(0.0f, 1.0f, 0.0f);
+	glPushMatrix();
+	
+    glBegin(GL_QUADS);
+    glVertex3f(-1000, -10, -1000);
+    glVertex3f(-1000, -10, 1000);
+    glVertex3f(1000, -10, 1000);
+    glVertex3f(1000, -10, -1000);
 
+    glEnd();
+    glPopMatrix();
+    glDisable(GL_COLOR_MATERIAL);
+}
+
+//----Create gate for Brisca home----
 void createWall(float z){
 
     glEnable(GL_COLOR_MATERIAL);
@@ -120,21 +123,21 @@ void createWall(float z){
 	
 }
 
-void createCrystal(float size, float x){
+//----Create rolling rocks----
+void createRock(float size, float x){
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
     glColor3f(0.64,0.16,0.16);
 
 	glPushMatrix();
-		glTranslatef(0,0,crystalZ);
+		glTranslatef(0,0,rockZ);
 		glPushMatrix();
-			glTranslatef(x,0,-10);
-			glRotatef(crystalAngle, 1, 0, 0);
+			glTranslatef(x,1,-10);
+			glRotatef(rockAngle, 1, 0, 0);
 			glScalef(size, size, size);
 			glutSolidDodecahedron();
 		glPopMatrix();
 	glPopMatrix();
 }
-
 
 
 // ------A recursive function to traverse scene graph and render each mesh----------
@@ -240,10 +243,7 @@ void initialise()
 	
 	for (uint n = 0; n < scene->mNumMeshes; n++)
 	{
-		for (uint iv = 0; iv < scene->mMeshes[n]->mNumVertices; iv++)
-		{
-			vertSize++;
-		}
+		vertSize += scene->mMeshes[n]->mNumVertices;
 	}
 	
 
@@ -268,18 +268,17 @@ void initialise()
 
 void moveBison(){
 	
-	if(movedDist <= 99){
+	if(movedDist <= RUNNING){
 		movedDist += 0.1;
 		lookOffX += 0.025;
-		rOffX += 0.030;
-		//rOffZ += 0.04;	
+		rOffX += 0.030;	
 		
 		if(movedDist <= 79){
-			crystalAngle++;
+			rockAngle++;
 			if(movedDist >= 50){
-				crystalZ += 0.115;
+				rockZ += 0.115;
 			} else{
-				crystalZ += 0.1;
+				rockZ += 0.1; //increase speed half way through
 			}
 		}
 	} 
@@ -287,6 +286,7 @@ void moveBison(){
 
 }
 
+//----Update nodes position and rotation----
 void updateNodes() {
 	aiMatrix4x4 matPos;
 	aiMatrix4x4 matRotn3;
@@ -354,7 +354,7 @@ void updateNodes() {
 		
 		}
 		
-		if(movedDist <= 92){
+		if(movedDist <= RUNNING){ //if passed the gate for a while
 			matPos.Translation(posn, matPos);
 			aiMatrix3x3 matRotn3 = rotn.GetMatrix();
 			aiMatrix4x4 matRot = aiMatrix4x4(matRotn3);
@@ -366,6 +366,7 @@ void updateNodes() {
 	}
 }
 
+//----Update vertices and normals----
 void updateMeshes() {
 
 	aiMatrix4x4 Bprod;
@@ -389,7 +390,7 @@ void updateMeshes() {
 			}
 				
 			//when mRootNode
-			Bprod =   currentNode->mTransformation * Bprod;
+			Bprod = currentNode->mTransformation * Bprod;
 				
 			aiMatrix4x4 D = Bprod;
 			D = D.Inverse().Transpose(); 
@@ -404,7 +405,8 @@ void updateMeshes() {
 				mesh->mNormals[vid] = D * norm[vid+off]; 
 			}
 		}
-		off = off + mesh->mNumVertices;
+
+		off = off + mesh->mNumVertices; //can move pointer to the next set of vertices
 	
 	}
 }
@@ -428,7 +430,6 @@ void update(int value)
 //----Keyboard callback to toggle initial model orientation---
 void keyboard(unsigned char key, int x, int y)
 {
-	if(key == '1') modelRotn = !modelRotn;   //Enable/disable initial model rotation
 	if(key == '2'){
 		angle++;
 		if(angle > 360) angle = 0;
@@ -441,34 +442,16 @@ void keyboard(unsigned char key, int x, int y)
 		lookOffX = lookOffX - 1;
 	}
 	if(key == '5'){
-		lookOffY = lookOffY + 5;
+		lookOffY = lookOffY + 1;
 	}
 	if(key == '6'){
-		lookOffY = lookOffY - 5;
+		lookOffY = lookOffY - 1;
 	}
 	if(key == '7'){
 		lookOffZ = lookOffZ + 1;
 	}
 	if(key == '8'){
 		lookOffZ = lookOffZ - 1;
-	}
-	if(key == '9'){
-		rOffX = rOffX + 1;
-	}
-	if(key == '0'){
-		rOffX = rOffX - 1;
-	}
-	if(key == 'q'){
-		rOffY = rOffY + 1;
-	}
-	if(key == 'w'){
-		rOffY = rOffY - 1;
-	}
-	if(key == 'e'){
-		rOffZ = rOffZ + 1;
-	}
-	if(key == 'r'){
-		rOffZ = rOffZ - 1;
 	}
 	if(key == 's'){
 		stop = !stop;
@@ -505,9 +488,9 @@ void display()
 	glPushMatrix();
 
 	glTranslatef(0,-9,0); //move to same height as base
-	createCrystal(2.1, 0);
-	createCrystal(1.8,-10);
-	createCrystal(1.3,10);
+	createRock(2.1, 0);
+	createRock(1.8,-10);
+	createRock(1.3,10);
 	
 
 	createWall(110);
@@ -516,11 +499,11 @@ void display()
 	
 	
 	glPushMatrix();	
-		makeFloor();
+		createFloor();
 		glTranslatef(0,0,movedDist); //move the model
 		//model
 		glPushMatrix();
-			glTranslatef(0,-12,0); // move the model down to the base
+			glTranslatef(0,-10,0); // move the model down to the base
 			glPushMatrix();
 				glRotatef(90, 1, 0, 0);	//rotate model so leg is on the base
 				render(scene, scene->mRootNode);

@@ -1,14 +1,11 @@
 //  ========================================================================
 //  COSC422: Advanced Computer Graphics;  University of Canterbury (2017)
 //
-//  FILE NAME: ModelLoader.cpp
+//  FILE NAME: Task1.cpp
 //
 //  This is a modified version of the sample program included with the Assimp library
 //    from http://www.assimp.org/main_downloads.html
-//
-//	Includes only basic functions (no texture mapping or skeletal animations)
-//  Press key '1' to toggle 90 degs model rotation about x-axis on/off.
-//  See Ex10.pdf for details.
+//	This function is modified from Exercise 10
 //  ========================================================================
 
 #include <iostream>
@@ -24,11 +21,8 @@ using namespace std;
 #include "assimp_extras.h"
 
 const aiScene* scene = NULL;
-GLuint scene_list = 0;
 float angle = 13;
-float pos = 0;
 aiVector3D scene_min, scene_max, scene_center;
-bool modelRotn = false;
 ofstream fileout;
 
 int tick = 0;
@@ -38,7 +32,7 @@ int lookOffY = 3;
 int lookOffZ = 2;
 bool stop = false;
 
-
+// ------Load scene and model----------
 bool loadModel(const char* fileName)
 {
 	scene = aiImportFile(fileName, aiProcess_Debone);
@@ -66,8 +60,6 @@ void render (const aiScene* sc, const aiNode* nd)
 	for (uint n = 0; n < nd->mNumMeshes; n++)
 	{
 		mesh = scene->mMeshes[nd->mMeshes[n]];
-		verts = mesh->mVertices;
-		norm = mesh->mNormals;
 	
 		apply_material(sc->mMaterials[mesh->mMaterialIndex]);
 
@@ -143,14 +135,13 @@ void initialise()
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 	fileout.open("BVH_Files/sceneInfo.txt", ios::out);
 	loadModel("BVH_Files/01_01.bvh");
-	//loadModel("Model Files/dwarf.x");		//<<<-------------Specify input file name here  --------------
-	//loadModel("Model Files/ArmyPilot.dae");		//<<<-------------Specify input file name here  --------------
-	
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45, 1, 1.0, 1000.0);
 }
 
+//----Update nodes position and rotation----
 void updateNodes() {
 	aiMatrix4x4 matPos;
 	aiMatrix4x4 matRotn3;
@@ -216,40 +207,41 @@ void keyboard(unsigned char key, int x, int y)
 {
 	if(key == '2'){
 		angle++;
-		cout << angle << endl;
 		if(angle > 360) angle = 0;
 	} 
 
 	if(key == '3'){
-		lookOffX = lookOffX + 5;
+		lookOffX = lookOffX + 1;
 	}
 	if(key == '4'){
-		lookOffX = lookOffX - 5;
+		lookOffX = lookOffX - 1;
 	}
 	if(key == '5'){
-		lookOffY = lookOffY + 5;
+		lookOffY = lookOffY + 1;
 	}
 	if(key == '6'){
-		lookOffY = lookOffY - 5;
+		lookOffY = lookOffY - 1;
 	}
 	if(key == '7'){
-		lookOffZ = lookOffZ + 5;
+		lookOffZ = lookOffZ + 1;
 	}
 	if(key == '8'){
-		lookOffZ = lookOffZ - 5;
+		lookOffZ = lookOffZ - 1;
 	}
 	if(key == 's'){
 		stop = !stop;
 	}
 	glutPostRedisplay();
 }
-void makeFloor(){
+
+//----Create floor----
+void createFloor(){
     glEnable(GL_COLOR_MATERIAL);
 	glPushMatrix();
     glBegin(GL_QUADS);
 
     glColor3f(0.64,0.16,0.16);
-    glVertex3f(-1000, -20, -1000);
+    glVertex3f(-1000, -10, -1000);
     glVertex3f(-1000, -10, 1000);
     glVertex3f(1000, -10, 1000);
     glVertex3f(1000, -10, -1000);
@@ -260,6 +252,7 @@ void makeFloor(){
 
 }
 	
+//----Create wall for a maze----
 void createWall(){
 
     glEnable(GL_COLOR_MATERIAL);
@@ -469,12 +462,11 @@ void display()
 	glRotatef(angle, 0.f, 1.f ,0.f);  //Continuous rotation about the y-axis
 
 	glScalef(tmp, tmp, tmp);
-
 	
 	render(scene, scene->mRootNode);
 
 	//create other objects
-	makeFloor();
+	createFloor();
 	createWall();
 
 	glutSwapBuffers();
