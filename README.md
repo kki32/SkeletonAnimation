@@ -1,1 +1,2 @@
 # SkeletonAnimation
+See README.pdf
